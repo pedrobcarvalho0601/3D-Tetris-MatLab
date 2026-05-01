@@ -1,0 +1,61 @@
+function Menu()
+
+    
+    % Cria a janela principal da interface e dá-lhe um título.
+    janela = uifigure('Name', 'Tetris 3D - Menu Principal');
+    
+    % Define a posição no ecrã e o tamanho da janela: [X, Y, Largura, Altura].
+    janela.Position = [100, 100, 800, 600];
+    
+    % Bloqueia o redimensionamento da janela para não desalinhar os botões.
+    janela.Resize = 'off';
+    
+    % Muda a cor de fundo da janela para um cinzento escuro (RGB de 0 a 1).
+    janela.Color = [0.2, 0.2, 0.2];
+
+    % =====================================================================
+    % --- ESPAÇO PARA A TUA IMAGEM DE FUNDO ---
+    % Para usares uma imagem, apaga o símbolo '%' das duas linhas abaixo.
+    % Substitui 'minha_foto.jpg' pelo nome exato do teu ficheiro de imagem.
+    % =====================================================================
+    
+    % fundo = uiimage(janela, 'ImageSource', 'minha_foto.jpg');
+    % fundo.Position = [1, 1, 800, 600]; % Faz a imagem cobrir toda a janela.
+
+    % =====================================================================
+    % --- ESPAÇO PARA A TUA MÚSICA DE FUNDO ---
+    % Para usares música, apaga o símbolo '%' das três linhas abaixo.
+    % Substitui 'minha_musica.mp3' pelo nome do teu ficheiro de áudio.
+    % =====================================================================
+    
+    % [audio, frequencia] = audioread('minha_musica.mp3');
+    % leitorMusica = audioplayer(audio, frequencia);
+    % play(leitorMusica); % Esta linha dá a ordem para a música começar a tocar.
+
+    % =====================================================================
+    % --- CRIAR OS BOTÕES (CENTRADOS NO MEIO DA JANELA) ---
+    % Como a janela tem 800 de largura, um botão de 200 fica centrado no X=300.
+    % =====================================================================
+
+    % Cria o botão Jogar 
+    botaoJogar = uibutton(janela, 'push');
+    botaoJogar.Text = 'Jogar';
+    botaoJogar.Position = [300, 350, 200, 50];     %[X=300, Y=350, Largura=200, Altura=50]
+    botaoJogar.FontSize = 18;                      %tamanho da letra 
+    botaoJogar.ButtonPushedFcn = @(src, event) disp('A iniciar o Tetris 3D...'); % Define o que acontece ao clicar (neste momento imprime uma mensagem no comando).
+
+    % Cria o botão "Opções" 
+    botaoOpcoes = uibutton(janela, 'push');
+    botaoOpcoes.Text = 'Opções';
+    botaoOpcoes.Position = [300, 275, 200, 50];    %(Y=275)
+    botaoOpcoes.FontSize = 18;
+    botaoOpcoes.ButtonPushedFcn = @(src, event) disp('A abrir o menu de opções...');
+
+    % Cria o botão "Sair" e associa-o à janela.
+    botaoSair = uibutton(janela, 'push');
+    botaoSair.Text = 'Sair';
+    botaoSair.Position = [300, 200, 200, 50];      %(Y=200).
+    botaoSair.FontSize = 18;
+    botaoSair.ButtonPushedFcn = @(src, event) close(janela); % fecha a janela usando o comando "close".
+
+end
