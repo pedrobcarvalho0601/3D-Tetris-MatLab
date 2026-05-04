@@ -33,22 +33,35 @@ function Menu()
     % --- COMPONENTES DO NOME (INICIALMENTE INVISÍVEIS) ---
     % =====================================================================
     
-    % Legenda para o nome
-    lblNome = uilabel(janela, 'Text', 'Introduz o teu Nome:', 'Position', [300, 310, 200, 20]);
-    lblNome.FontColor = 'w';
-    lblNome.FontSize = 16;
-    lblNome.Visible = 'off'; % Começa escondido
+   % 1. Nome do Jogador
+    lblNome = uilabel(janela, 'Text', 'Nome do Jogador:', 'Position', [300, 420, 200, 20], 'FontColor', 'w', 'FontSize', 14);
+    campoNome = uieditfield(janela, 'text', 'Position', [300, 390, 200, 30]);
+    lblNome.Visible = 'off'; 
+    campoNome.Visible = 'off';
 
-    % Campo de texto para o nome
-    campoNome = uieditfield(janela, 'text', 'Position', [300, 270, 200, 35]);
-    campoNome.Visible = 'off'; % Começa escondido
+    % 2. Dimensão 'n' (Base n x n)
+    lblDimN = uilabel(janela, 'Text', 'Largura/Profundidade (n):', 'Position', [300, 340, 200, 20], 'FontColor', 'w', 'FontSize', 14);
+    % O spinner garante que o valor é numérico e fica entre 4 e 10. Começa no 5.
+    spinnerN = uispinner(janela, 'Limits', [4, 10], 'Value', 5, 'Position', [300, 310, 200, 30]);
+    lblDimN.Visible = 'off'; spinnerN.Visible = 'off';
 
-    % Botão para confirmar o nome e iniciar o jogo
+    % 3. Dimensão 'h' (Altura)
+    lblDimH = uilabel(janela, 'Text', 'Altura (h):', 'Position', [300, 260, 200, 20], 'FontColor', 'w', 'FontSize', 14);
+    % Limites entre 4 e 10. Começa no 10.
+    spinnerH = uispinner(janela, 'Limits', [4, 10], 'Value', 10, 'Position', [300, 230, 200, 30]);
+    lblDimH.Visible = 'off'; spinnerH.Visible = 'off';
+
+    % 4. Dica / Recomendação
+    lblDica = uilabel(janela, 'Text', '(Recomendado: n=5 e h=10)', 'Position', [300, 190, 200, 20], 'FontColor', 'y', 'FontSize', 12, 'HorizontalAlignment', 'center');
+    lblDica.Visible = 'off';
+
+    % 5. Botão para Confirmar
     botaoConfirmar = uibutton(janela, 'push', 'Text', 'Confirmar e Iniciar');
-    botaoConfirmar.Position = [300, 210, 200, 45];
-    botaoConfirmar.BackgroundColor = [0.2, 0.6, 0.2]; % Verde
+    botaoConfirmar.Position = [300, 120, 200, 45];
+    botaoConfirmar.BackgroundColor = [0.2, 0.6, 0.2];
     botaoConfirmar.FontColor = 'w';
-    botaoConfirmar.Visible = 'off'; % Começa escondido
+    botaoConfirmar.FontSize = 14;
+    botaoConfirmar.Visible = 'off';
 
     % =====================================================================
     % --- BOTÕES PRINCIPAIS ---
@@ -84,9 +97,10 @@ function Menu()
         botaoSair.Visible = 'off';
         
         % Mostra os campos para o nome
-        lblNome.Visible = 'on';
-        campoNome.Visible = 'on';
-        botaoConfirmar.Visible = 'on';
+        lblNome.Visible = 'on'; campoNome.Visible = 'on';
+        lblDimN.Visible = 'on'; spinnerN.Visible = 'on';
+        lblDimH.Visible = 'on'; spinnerH.Visible = 'on';
+        lblDica.Visible = 'on'; botaoConfirmar.Visible = 'on';
     end
 
     % O que acontece ao clicar em CONFIRMAR:
@@ -98,10 +112,13 @@ function Menu()
             nomePlayer = 'Jogador Desconhecido';
         end
         
+        n = spinnerN.Value; % Guarda o valor de n (largura e profundidade)
+        h = spinnerH.Value; % Guarda o valor de h (altura)
+
         stop(leitorMusica); % Pára a música
         close(janela);      % Fecha o menu
         
         % Chama o script do Tabuleiro passando o nome
-        Tabuleiro(nomePlayer); 
+        Tabuleiro(nomePlayer, n, h); 
     end
 end
