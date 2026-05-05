@@ -1,42 +1,49 @@
-function Tabuleiro(nomeJogador, n, h)
-    % A função agora recebe três informações: o nome, o n e o h.
+function Tabuleiro(nomePlayer, n, h)
 
-    % Cria a janela do jogo e ajusta o título para incluir as dimensões
-    tituloJanela = sprintf('Tetris 3D - %s [%dx%dx%d]', nomeJogador, n, n, h);
-    figJogo = figure('Name', tituloJanela, 'Color', 'black');
-    
-    % Cria os eixos 3D (o "recinto")
-    ax = axes('Parent', figJogo);
-    grid(ax, 'on');       
-    view(ax, 3);          
-    axis(ax, 'equal');    % Mantém os blocos como cubos perfeitos
-    
-    % =====================================================================
-    % APLICA AS DIMENSÕES FORNECIDAS PELO UTILIZADOR
-    % O campo será de n x n na base (X e Y), e altura h (Z).
-    % =====================================================================
-    xlim(ax, [0, n]);
-    ylim(ax, [0, n]);
-    zlim(ax, [0, h]);
-    
-    % Opções de design: cores estilo "Neon" / Retro
-    ax.GridColor = [0, 1, 1]; % Grelha azul cyano
-    ax.GridAlpha = 0.5;       % Torna a grelha ligeiramente transparente
-    ax.Color = 'black';       % Fundo do gráfico a preto
-    ax.XColor = 'w'; ax.YColor = 'w'; ax.ZColor = 'w'; % Texto dos eixos a branco
-    
-    % Legendas dos Eixos
-    xlabel(ax, 'Eixo X');
-    ylabel(ax, 'Eixo Y');
-    zlabel(ax, 'Altura Z');
-    
-    % Dá as boas-vindas e confirma o tamanho no topo do tabuleiro
-    title(ax, sprintf('Boa sorte %s! Arena: %dx%dx%d', nomeJogador, n, n, h), 'Color', 'w', 'FontSize', 14);
-    
-    % Desenha uma linha mais grossa à volta da base (para o "chão" ser mais visível)
-    hold(ax, 'on');
-    plot3(ax, [0 n n 0 0], [0 0 n n 0], [0 0 0 0 0], 'Color', [1 0 1], 'LineWidth', 2); % Quadrado rosa na base
-    hold(ax, 'off');
-    
-    disp(['Tetris 3D iniciado para: ', nomeJogador, ' com recinto ', num2str(n), 'x', num2str(n), 'x', num2str(h)]);
+%======================%
+%         JOGO
+%======================%
+
+% Cria o tabuleiro
+    figJogo = uifigure('Name', 'Tetris 3D');
+    figJogo.WindowState = 'fullscreen';
+    figJogo.Color = 'black';
+
+% Adiciona a musica
+    [audio, frequencia] = audioread('GameMusic.mp3');
+    leitorMusica = audioplayer(audio, frequencia);
+    figJogo.UserData = leitorMusica;
+    leitorMusica.StopFcn = @(src, event) play(src);
+    play(leitorMusica);
+
+% Painel de jogo
+    jogo = uiaxes('Parent', figJogo);
+    disableDefaultInteractivity(jogo);
+    grid(jogo, 'on');
+    view(jogo, 3);
+    axis(jogo, 'equal');
+    jogo.Units = 'normalized';
+    jogo.Position = [0.1, 0.05, 0.8, 0.9];
+
+% Remove os numeros dos lados
+    jogo.XTickLabel = {};
+    jogo.YTickLabel = {};
+    jogo.ZTickLabel = {};
+
+% Define o tamanho do tabuleiro
+    xlim(jogo, [0, n]);
+    ylim(jogo, [0, n]);
+    zlim(jogo, [0, h]);
+
+% Mostra a grelha completa sempre
+    jogo.Box = 'on';
+    jogo.BoxStyle = 'full';
+
+% Cores do tabuleiro
+    jogo.GridColor = 'white';
+    jogo.GridAlpha = 0.5;
+    jogo.Color = 'blue';
+    jogo.XColor = 'w'; jogo.YColor = 'w'; jogo.ZColor = 'w';
+    title(jogo, sprintf('Boa sorte %s! Arena: %dx%dx%d', nomePlayer, n, n, h), 'Color', 'w', 'FontSize', 14);
+
 end

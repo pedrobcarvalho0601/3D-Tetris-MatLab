@@ -10,8 +10,8 @@
 function Menu()
 
     % Janela principal
-    janela = uifigure('Name', 'Tetris 3D - Menu Principal');
-    janela.Position = [100, 100, 800, 600]; 
+    janela = uifigure('Name', 'Tetris 3D');
+    janela.Position = [100, 100, 800, 600];
     janela.Resize = 'off';
     janela.Color = [0.2, 0.2, 0.2];
 
@@ -78,7 +78,7 @@ function Menu()
     botaoSair = uibutton(janela, 'push', 'Text', 'Sair');
     botaoSair.Position = [300, 130, 200, 50];
     botaoSair.FontSize = 18;
-    botaoSair.ButtonPushedFcn = @(src, event) [stop(leitorMusica), close(janela)];
+    botaoSair.ButtonPushedFcn = @(src, event) [close(janela)];
 
     % =====================================================================
     % --- LÓGICA DE TRANSIÇÃO ---
@@ -111,8 +111,7 @@ function Menu()
         
         n = spinnerN.Value; % Guarda o valor de n (largura e profundidade)
         h = spinnerH.Value; % Guarda o valor de h (altura)
-
-        stop(leitorMusica); % Pára a música
+        
         close(janela);      % Fecha o menu
         
         % Chama o script do Tabuleiro passando o nome
