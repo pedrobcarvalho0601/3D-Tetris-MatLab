@@ -1,7 +1,7 @@
 function Tabuleiro(nomePlayer, n, h)
 
 %======================%
-%         JOGO
+%      TABULEIRO
 %======================%
 
 % Cria o tabuleiro
@@ -46,4 +46,29 @@ function Tabuleiro(nomePlayer, n, h)
     jogo.XColor = 'w'; jogo.YColor = 'w'; jogo.ZColor = 'w';
     title(jogo, sprintf('Boa sorte %s! Arena: %dx%dx%d', nomePlayer, n, n, h), 'Color', 'w', 'FontSize', 14);
 
+%======================%
+%         JOGO
+%======================%
+% Inicializa o estado do jogo
+    score = 0;
+    level = 1; %velocidade
+    gameOver = false;
+
+    while ~gameOver
+        % Exibe a pontuação
+        lblPontos = uilabel('Parent', figJogo, 'Text', sprintf('Pontuação: %d', score), 'Position', [10, 10, 100, 22], 'FontColor', 'w');
+        
+        sel = randi([1, 4]);
+        [novaPeca, Pontos] = Pecas(sel);
+        
+        % Atualiza a pontuação
+        score = score + Pontos;
+        lblPontos.Text = sprintf('Pontuação: %d', score);
+        
+        % Verifica se o jogo acabou
+        if %colocar a condiçao para fim de jogo
+            gameOver = true;
+        end
+    end
+    % Tela de GameOver    
 end
