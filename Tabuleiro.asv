@@ -52,7 +52,7 @@ function Tabuleiro(nomePlayer, n, h)
 %======================%
 % Inicializa o estado do jogo
     score = 0;
-    level = 0; %velocidade
+    level = 1; %velocidade
     gameOver = false;
 
     while ~gameOver
@@ -75,19 +75,13 @@ function Tabuleiro(nomePlayer, n, h)
 
         % Alterar a velocidade de queda
         switch level
-            case 0
-                % 1 seg para cair
             case 1
-                % 0.9 seg para cair
+                % 1 seg para cair
             case 2
-                % 0.8 seg para cair
+                % 1 seg para cair
             case 3
-                % 0.7 seg para cair
             case 4
-                % 0.6 seg para cair
             case 5
-                % 0.5 seg para cair
-        end
 
         % Verifica se o jogo acabou
         if %colocar a condiçao para fim de jogo
