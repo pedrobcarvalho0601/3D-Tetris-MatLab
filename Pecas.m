@@ -1,4 +1,4 @@
-function [novaPeca, Pontos] = Pecas(sel)
+function [novaPeca, Pontos] = Pecas(pec)
     % Esta função recebe um número (sel) e devolve a peça correspondente.
     % Cada peça é guardada numa "estrutura" (novaPeca) com coordenadas e cor.
     
@@ -7,7 +7,7 @@ function [novaPeca, Pontos] = Pecas(sel)
     % As coordenadas representam a posição [X, Y, Z] dos 4 cubinhos que formam a peça.
     % Assumimos que a peça nasce deitada na horizontal (Z = 0).
     
-    switch sel
+    switch pec
         case 1
             % Peça 'I' (Reta) - Cor Ciano
             % Formato: Quatro blocos em linha

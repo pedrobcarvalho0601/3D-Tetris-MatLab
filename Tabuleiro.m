@@ -31,48 +31,84 @@ function Tabuleiro(nomePlayer, n, h)
 
     %-----------------------------------------------------------------------------------------------%
         
-
     % --- PREPARAÇÃO DA PEÇA ---
-    sel = randi([1, 4]);                                     % Escolhe um tipo de peça aleatoriamente
-    [pecaInfo, ~] = Pecas(sel);                              % Obtém coordenadas e cor do script 'Pecas.m'
+    p = Pecas(randi(4));                    % Pega uma peça aleatória (p)
+    x = floor(n/2); 
+    y = x;                                  % Posição inicial: meio da base e topo
+    z = h-1;
+    objs = [];
     
-    posX = floor(n/2);                                       % Define a posição X inicial no centro da base
-    posY = floor(n/2);                                       % Define a posição Y inicial no centro da base
-    posZ = h - 1;                                            % Define a altura de nascimento (topo da arena)
-    
-    % --- CICLO DE ANIMAÇÃO (QUEDA) ---
-    %isto é gemini para ver como seria feito e ver se funciona
-    %vamos tentar mudar mas usar uma base
+    % --- CONFIGURAÇÃO DO TECLADO (AWSD) ---
+    figJogo.WindowKeyPressFcn = @gestaoTeclado; % Ativa a escuta das teclas
 
-    while posZ >= 0
-        handlesPeca = [];                                    % Cria lista vazia para guardar os cubos da peça
+    % --- CICLO DE QUEDA ---
+    while z >= 0
+        desenharFrame();     % Desenha a peça na posição atual
+        pause(0.5);          % Espera o tempo da queda
         
-        for i = 1:4                                          % Ciclo para desenhar os 4 blocos da peça
-            realX = pecaInfo.coords(i,1) + posX;             % Calcula a posição X final no tabuleiro
-            realY = pecaInfo.coords(i,2) + posY;             % Calcula a posição Y final no tabuleiro
-            realZ = pecaInfo.coords(i,3) + posZ;             % Calcula a posição Z final no tabuleiro
-            
-            hCubo = desenharCubo(jogo, realX, realY, realZ, pecaInfo.cor); % Desenha o cubo 3D
-            handlesPeca = [handlesPeca, hCubo];              % Guarda a "ID" do cubo para apagar depois
+        if z > 0
+            apagarPeca();    % Apaga para mover
+            z = z - 1;       % Gravidade: desce um nível
+        else
+            break;           % Chegou ao fundo
         end
-        
-        pause(0.5);                                          % Pausa o código para o olho humano ver a queda
-        
-        if posZ > 0
-            delete(handlesPeca);                             % Apaga o desenho atual antes de mover para baixo
-        end
-        
-        posZ = posZ - 1;                                     % Atualiza a altura para o nível seguinte
     end
     
-    title(jogo, 'A peça chegou ao fundo!', 'Color', 'y');    % Altera o título quando a peça para de cair
-end
+    % --- FUNÇÃO PARA CONSTRUIR O CUBO ---
+    function h = desenharCubo(ax, x, y, z, cor)
+        v = [0 0 0; 1 0 0; 1 1 0; 0 1 0; 0 0 1; 1 0 1; 1 1 1; 0 1 1]; % Coordenadas dos 8 vértices de um cubo
+        v = v + [x y z];                                              % Move os vértices para o local correto (Translação)
+        f = [1 2 6 5; 2 3 7 6; 3 4 8 7; 4 1 5 8; 1 2 3 4; 5 6 7 8];   % Define as 6 faces que formam o volume
+        h = patch('Parent', ax, 'Vertices', v, 'Faces', f, ...        % Renderiza o objeto 3D com a cor escolhida
+                  'FaceColor', cor, 'EdgeAlpha', 0.3);                % Define cor e transparência das arestas
+    end
 
-% --- FUNÇÃO PARA CONSTRUIR O CUBO ---
-function h = desenharCubo(ax, x, y, z, cor)
-    v = [0 0 0; 1 0 0; 1 1 0; 0 1 0; 0 0 1; 1 0 1; 1 1 1; 0 1 1]; % Coordenadas dos 8 vértices de um cubo
-    v = v + [x y z];                                              % Move os vértices para o local correto (Translação)
-    f = [1 2 6 5; 2 3 7 6; 3 4 8 7; 4 1 5 8; 1 2 3 4; 5 6 7 8];   % Define as 6 faces que formam o volume
-    h = patch('Parent', ax, 'Vertices', v, 'Faces', f, ...        % Renderiza o objeto 3D com a cor escolhida
-              'FaceColor', cor, 'EdgeAlpha', 0.3);                % Define cor e transparência das arestas
+
+    % --- FUNÇÃO INTERNA: GESTÃO DO TECLADO ---
+    function gestaoTeclado(~, event)
+        novoX = x; novoY = y;
+
+        % Define a intenção de movimento
+        switch event.Key
+            case 'a', novoX = x - 1; % Esquerda
+            case 'd', novoX = x + 1; % Direita
+            case 'w', novoY = y + 1; % Frente
+            case 's', novoY = y - 1; % Trás
+        end
+
+        % VERIFICAÇÃO DE LIMITES: A peça pode ir para ali?
+        podeMover = true;
+        for i = 1:4
+            proxX = p.coords(i,1) + novoX;
+            proxY = p.coords(i,2) + novoY;
+
+            % Se sair dos limites [0, n], cancela o movimento
+            if proxX < 0 || proxX >= n || proxY < 0 || proxY >= n
+                podeMover = false;
+            end
+        end
+        
+        if podeMover
+            apagarPeca();    % Apaga a posição antiga
+            x = novoX;       % Atualiza X
+            y = novoY;       % Atualiza Y
+            desenharFrame(); % Desenha na nova posição imediatamente
+        end
+    end
+
+    % --- FUNÇÕES DE SUPORTE ---
+    function desenharFrame()
+        apagarPeca(); % Garante que não há duplicados
+        for i = 1:4
+            objs(i) = desenharCubo(ax, p.coords(i,1)+x, p.coords(i,2)+y, p.coords(i,3)+z, p.cor);
+        end
+    end
+
+    function apagarPeca()
+        if ~isempty(objs)
+            delete(objs(isvalid(objs))); % Apaga apenas os cubos que ainda existem
+            objs = [];
+        end
+    end
+
 end
