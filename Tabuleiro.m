@@ -1,78 +1,168 @@
 function Tabuleiro(nomePlayer, n, h)
     % --- CONFIGURAÇÃO DA INTERFACE ---
-    figJogo = uifigure('Name', 'Tetris 3D');                 % Cria a janela principal da aplicação
-    figJogo.WindowState = 'fullscreen';                      % Define o modo de visualização para ecrã total
-    figJogo.Color = 'black';                                 % Define a cor de fundo da janela como preto
+    figJogo = uifigure('Name', 'Tetris 3D');
+    figJogo.WindowState = 'fullscreen';
+    figJogo.Color = 'black';
+
+    % --- VARIÁVEL PARTILHADA PARA A TECLA ---
+    % Definida aqui para ser acessível tanto pelo ciclo principal
+    % como pela função de callback do teclado.
+    teclaAtual = '';
+
+    % --- REGISTO DO CALLBACK DO TECLADO ---
+    % Definido UMA ÚNICA VEZ, antes de qualquer ciclo.
+    figJogo.KeyPressFcn = @(src, event) teclaPressionada(event);
 
     % --- GESTÃO DO SOM ---
-    [audio, freq] = audioread('GameMusic.mp3');              % Carrega o ficheiro de áudio e a sua frequência
-    leitorMusica = audioplayer(audio, freq);                 % Cria o objeto de reprodução sonora
-    figJogo.UserData = leitorMusica;                         % Guarda o objeto na janela para evitar que pare
-    leitorMusica.StopFcn = @(src, event) play(src);          % Configura o loop (tocar sempre que acabar)
-    play(leitorMusica);                                      % Inicia a música de fundo
+    [audio, freq] = audioread('GameMusic.mp3');
+    leitorMusica = audioplayer(audio, freq);
+    figJogo.UserData = leitorMusica;
+    leitorMusica.StopFcn = @(src, event) play(src);
+    play(leitorMusica);
 
     % --- CONFIGURAÇÃO DO CAMPO 3D (ARENA) ---
-    jogo = uiaxes('Parent', figJogo);                        % Cria o espaço de desenho 3D na janela
-    disableDefaultInteractivity(jogo);                       % Desativa zoom/rotação automáticos do rato
-    grid(jogo, 'on');                                        % Ativa a grelha visual de referência
-    view(jogo, 3);                                           % Define a perspetiva de visualização em 3D
-    axis(jogo, 'equal');                                     % Mantém proporções iguais para os cubos não deformarem
-    jogo.Units = 'normalized';                               % Define o sistema de unidades como percentagem
-    jogo.Position = [0.1, 0.05, 0.8, 0.9];                   % Posiciona o gráfico [Esq, Baixo, Larg, Alt]
-    
-    xlim(jogo, [0, n]);                                      % Define o limite da largura (Eixo X)
-    ylim(jogo, [0, n]);                                      % Define o limite da profundidade (Eixo Y)
-    zlim(jogo, [0, h]);                                      % Define o limite da altura máxima (Eixo Z)
-    
-    jogo.GridColor = 'white';                                % Define a cor das linhas da grelha
-    jogo.Color = [0.05 0.05 0.1];                            % Define a cor do "espaço" interior da arena
-    title(jogo, sprintf('Jogador: %s', nomePlayer), 'Color', 'w'); % Exibe o nome do jogador no topo
+    jogo = uiaxes('Parent', figJogo);
+    disableDefaultInteractivity(jogo);
+    grid(jogo, 'on');
+    view(jogo, 3);
+    axis(jogo, 'equal');
+    jogo.Units = 'normalized';
+    jogo.Position = [0.1, 0.05, 0.8, 0.9];
 
+    xlim(jogo, [0, n]);
+    ylim(jogo, [0, n]);
+    zlim(jogo, [0, h]);
+
+    jogo.GridColor = 'white';
+    jogo.Color = [0.05 0.05 0.1];
+    title(jogo, sprintf('Jogador: %s', nomePlayer), 'Color', 'w');
 
     %-----------------------------------------------------------------------------------------------%
-        
 
-    % --- PREPARAÇÃO DA PEÇA ---
-    sel = randi([1, 4]);                                     % Escolhe um tipo de peça aleatoriamente
-    [pecaInfo, Pontos] = Pecas(sel);                         % Obtém coordenadas e cor do script 'Pecas.m'
-    
-    posX = floor(n/2);                                       % Define a posição X inicial no centro da base
-    posY = floor(n/2);                                       % Define a posição Y inicial no centro da base
-    posZ = h - 1;                                            % Define a altura de nascimento (topo da arena)
-    
-    % --- CICLO DE ANIMAÇÃO (QUEDA) ---
-    %isto é gemini para ver como seria feito e ver se funciona
-    %vamos tentar mudar mas usar uma base
+    % --- MATRIZ DO TABULEIRO ---
+    % Regista quais as células ocupadas: 0 = livre, 1 = ocupado.
+    % Índices: tabuleiro(x, y, z) — todos com offset +1 por MATLAB começar em 1.
+    tabuleiro = zeros(n, n, h);
 
-    while posZ >= 0
-        atualPeca = [];                                      % Cria lista vazia para guardar os cubos da peça
-        
-        for i = 1:Pontos
-            realX = pecaInfo.coords(i,1) + posX;             % Calcula a posição X final no tabuleiro
-            realY = pecaInfo.coords(i,2) + posY;             % Calcula a posição Y final no tabuleiro
-            realZ = pecaInfo.coords(i,3) + posZ;             % Calcula a posição Z final no tabuleiro
-            
-            hCubo = desenharCubo(jogo, realX, realY, realZ, pecaInfo.cor); % Desenha o cubo 3D
-            atualPeca = [atualPeca, hCubo];                  % Guarda a "ID" do cubo para apagar depois
+    % --- CICLO PRINCIPAL DO JOGO ---
+    while true
+        % --- PREPARAÇÃO DA PEÇA ---
+        sel = randi([1, 4]);
+        [pecaInfo, Pontos] = Pecas(sel);
+
+        posX = floor(n/2);
+        posY = floor(n/2);
+        posZ = h - 1;
+
+        % Verifica se a posição inicial já está ocupada (fim de jogo)
+        if verificaColisao(tabuleiro, pecaInfo, posX, posY, posZ, n, h)
+            title(jogo, 'GAME OVER', 'Color', 'r');
+            break;
         end
-        
-        pause(0.5);                                          % Pausa o código para o olho humano ver a queda
-        
-        if posZ > 0
-            delete(atualPeca);                             % Apaga o desenho atual antes de mover para baixo
+
+        % --- CICLO DE QUEDA ---
+        while true
+            % Desenha a peça na posição atual
+            atualPeca = [];
+            for i = 1:Pontos
+                realX = pecaInfo.coords(i,1) + posX;
+                realY = pecaInfo.coords(i,2) + posY;
+                realZ = pecaInfo.coords(i,3) + posZ;
+                hCubo = desenharCubo(jogo, realX, realY, realZ, pecaInfo.cor);
+                atualPeca = [atualPeca, hCubo];
+            end
+
+            pause(0.5);
+
+            % --- PROCESSAR TECLA PRESSIONADA ---
+            % Lê a teclaAtual (partilhada com o callback), tenta mover,
+            % e verifica colisão antes de aplicar o movimento.
+            novoPosX = posX;
+            novoPosY = posY;
+
+            switch teclaAtual
+                case 'leftarrow'
+                    novoPosX = posX - 1;
+                case 'rightarrow'
+                    novoPosX = posX + 1;
+                case 'uparrow'
+                    novoPosY = posY + 1;
+                case 'downarrow'
+                    novoPosY = posY - 1;
+            end
+
+            % Só aplica o movimento se não causar colisão lateral
+            if ~verificaColisao(tabuleiro, pecaInfo, novoPosX, novoPosY, posZ, n, h)
+                posX = novoPosX;
+                posY = novoPosY;
+            end
+
+            teclaAtual = '';   % Limpa a tecla depois de processar
+
+            % --- DESCIDA ---
+            % Calcula a próxima posição (um nível abaixo)
+            proximoZ = posZ - 1;
+
+            % Verifica se a próxima posição causa colisão (fundo ou cubo existente)
+            if verificaColisao(tabuleiro, pecaInfo, posX, posY, proximoZ, n, h)
+                % A peça fica aqui — regista na matriz e sai do ciclo de queda
+                for i = 1:Pontos
+                    mx = pecaInfo.coords(i,1) + posX + 1;   % +1 por MATLAB começar em 1
+                    my = pecaInfo.coords(i,2) + posY + 1;
+                    mz = pecaInfo.coords(i,3) + posZ + 1;
+                    tabuleiro(mx, my, mz) = 1;
+                end
+                break;
+            end
+
+            % Sem colisão: apaga e desce
+            delete(atualPeca);
+            posZ = proximoZ;
         end
-        
-        posZ = posZ - 1;
+
+        % A peça ficou desenhada (não foi apagada) — continua para a próxima
     end
-    
-    %title(jogo, 'A peça chegou ao fundo!', 'Color', 'y');    % Altera o título quando a peça para de cair
-end
 
-% --- FUNÇÃO PARA CONSTRUIR O CUBO ---
-function h = desenharCubo(ax, x, y, z, cor)
-    v = [0 0 0; 1 0 0; 1 1 0; 0 1 0; 0 0 1; 1 0 1; 1 1 1; 0 1 1]; % Coordenadas dos 8 vértices de um cubo
-    v = v + [x y z];                                              % Move os vértices para o local correto (Translação)
-    f = [1 2 6 5; 2 3 7 6; 3 4 8 7; 4 1 5 8; 1 2 3 4; 5 6 7 8];   % Define as 6 faces que formam o volume
-    h = patch('Parent', ax, 'Vertices', v, 'Faces', f, ...        % Renderiza o objeto 3D com a cor escolhida
-              'FaceColor', cor, 'EdgeAlpha', 0.3);                % Define cor e transparência das arestas
+    %-----------------------------------------------------------------------------------------------%
+
+    % --- FUNÇÃO CALLBACK DO TECLADO ---
+    % Atualiza a variável partilhada 'teclaAtual' sempre que uma tecla é pressionada.
+    function teclaPressionada(event)
+        teclaAtual = event.Key;
+    end
+
+    % --- FUNÇÃO PARA VERIFICAR COLISÃO ---
+    function colisao = verificaColisao(tab, peca, px, py, pz, limN, limH)
+        colisao = false;
+        for j = 1:size(peca.coords, 1)
+            x = peca.coords(j,1) + px;
+            y = peca.coords(j,2) + py;
+            z = peca.coords(j,3) + pz;
+
+            % Verifica se saiu dos limites da arena
+            if z < 0 || x < 0 || x >= limN || y < 0 || y >= limN
+                colisao = true;
+                return;
+            end
+
+            % Verifica se a célula está ocupada na matriz
+            % (+1 para converter de índice base-0 para base-1 do MATLAB)
+            if z >= 0 && z < limH
+                if tab(x+1, y+1, z+1) == 1
+                    colisao = true;
+                    return;
+                end
+            end
+        end
+    end
+
+    % --- FUNÇÃO PARA CONSTRUIR O CUBO ---
+    function hPatch = desenharCubo(ax, x, y, z, cor)
+    hPatch = [];
+    v = [0 0 0; 1 0 0; 1 1 0; 0 1 0; 0 0 1; 1 0 1; 1 1 1; 0 1 1];
+    v = v + [x y z];
+    f = [1 2 6 5; 2 3 7 6; 3 4 8 7; 4 1 5 8; 1 2 3 4; 5 6 7 8];
+    hPatch = patch('Parent', ax, 'Vertices', v, 'Faces', f, ...
+                   'FaceColor', cor, 'EdgeAlpha', 0.3);
+    end
 end
