@@ -15,8 +15,21 @@ function VisualizadorPecas()
         cor = peca.cor;
         
         % Para cada um dos 4 blocos da peça, vamos desenhar um cubo
-        for b = 1:4
-            desenharCubo(ax, coords(b,1), coords(b,2), coords(b,3), cor);
+        switch i
+            case 1
+                desenharCubo(ax, coords(1,1), coords(1,2), coords(1,3), cor); 
+            case 2
+                for b = 1:8
+                    desenharCubo(ax, coords(b,1), coords(b,2), coords(b,3), cor);
+                end
+            case 3
+                for b = 1:2
+                    desenharCubo(ax, coords(b,1), coords(b,2), coords(b,3), cor);
+                end
+            case 4
+                for b = 1:3
+                    desenharCubo(ax, coords(b,1), coords(b,2), coords(b,3), cor);
+                end
         end
         
         % Configurações de visualização

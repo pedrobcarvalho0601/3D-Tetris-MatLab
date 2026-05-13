@@ -34,7 +34,7 @@ function Tabuleiro(nomePlayer, n, h)
 
     % --- PREPARAÇÃO DA PEÇA ---
     sel = randi([1, 4]);                                     % Escolhe um tipo de peça aleatoriamente
-    [pecaInfo, ~] = Pecas(sel);                              % Obtém coordenadas e cor do script 'Pecas.m'
+    [pecaInfo, Pontos] = Pecas(sel);                         % Obtém coordenadas e cor do script 'Pecas.m'
     
     posX = floor(n/2);                                       % Define a posição X inicial no centro da base
     posY = floor(n/2);                                       % Define a posição Y inicial no centro da base
@@ -45,27 +45,27 @@ function Tabuleiro(nomePlayer, n, h)
     %vamos tentar mudar mas usar uma base
 
     while posZ >= 0
-        handlesPeca = [];                                    % Cria lista vazia para guardar os cubos da peça
+        atualPeca = [];                                      % Cria lista vazia para guardar os cubos da peça
         
-        for i = 1:4                                          % Ciclo para desenhar os 4 blocos da peça
+        for i = 1:Pontos
             realX = pecaInfo.coords(i,1) + posX;             % Calcula a posição X final no tabuleiro
             realY = pecaInfo.coords(i,2) + posY;             % Calcula a posição Y final no tabuleiro
             realZ = pecaInfo.coords(i,3) + posZ;             % Calcula a posição Z final no tabuleiro
             
             hCubo = desenharCubo(jogo, realX, realY, realZ, pecaInfo.cor); % Desenha o cubo 3D
-            handlesPeca = [handlesPeca, hCubo];              % Guarda a "ID" do cubo para apagar depois
+            atualPeca = [atualPeca, hCubo];                  % Guarda a "ID" do cubo para apagar depois
         end
         
         pause(0.5);                                          % Pausa o código para o olho humano ver a queda
         
         if posZ > 0
-            delete(handlesPeca);                             % Apaga o desenho atual antes de mover para baixo
+            delete(atualPeca);                             % Apaga o desenho atual antes de mover para baixo
         end
         
-        posZ = posZ - 1;                                     % Atualiza a altura para o nível seguinte
+        posZ = posZ - 1;
     end
     
-    title(jogo, 'A peça chegou ao fundo!', 'Color', 'y');    % Altera o título quando a peça para de cair
+    %title(jogo, 'A peça chegou ao fundo!', 'Color', 'y');    % Altera o título quando a peça para de cair
 end
 
 % --- FUNÇÃO PARA CONSTRUIR O CUBO ---
