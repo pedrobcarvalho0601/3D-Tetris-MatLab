@@ -19,7 +19,7 @@ function [novaPeca, Pontos] = Pecas(sel)
         case 3
             coords = [0 0 0; -1 0 0];
             cor = [1 0 1];
-            Pontos = 2<;
+            Pontos = 2;
             
         case 4
             coords = [0 0 0; 1 0 0; -1 0 0];

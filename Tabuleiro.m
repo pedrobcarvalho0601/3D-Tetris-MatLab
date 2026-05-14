@@ -79,7 +79,7 @@ function Tabuleiro(nomePlayer, n, h)
             % e verifica colisão antes de aplicar o movimento.
             novoPosX = posX;
             novoPosY = posY;
-
+            
             switch teclaAtual
                 case 'leftarrow'
                     novoPosX = posX - 1;
@@ -129,40 +129,5 @@ function Tabuleiro(nomePlayer, n, h)
     % Atualiza a variável partilhada 'teclaAtual' sempre que uma tecla é pressionada.
     function teclaPressionada(event)
         teclaAtual = event.Key;
-    end
-
-    % --- FUNÇÃO PARA VERIFICAR COLISÃO ---
-    function colisao = verificaColisao(tab, peca, px, py, pz, limN, limH)
-        colisao = false;
-        for j = 1:size(peca.coords, 1)
-            x = peca.coords(j,1) + px;
-            y = peca.coords(j,2) + py;
-            z = peca.coords(j,3) + pz;
-
-            % Verifica se saiu dos limites da arena
-            if z < 0 || x < 0 || x >= limN || y < 0 || y >= limN
-                colisao = true;
-                return;
-            end
-
-            % Verifica se a célula está ocupada na matriz
-            % (+1 para converter de índice base-0 para base-1 do MATLAB)
-            if z >= 0 && z < limH
-                if tab(x+1, y+1, z+1) == 1
-                    colisao = true;
-                    return;
-                end
-            end
-        end
-    end
-
-    % --- FUNÇÃO PARA CONSTRUIR O CUBO ---
-    function hPatch = desenharCubo(ax, x, y, z, cor)
-    hPatch = [];
-    v = [0 0 0; 1 0 0; 1 1 0; 0 1 0; 0 0 1; 1 0 1; 1 1 1; 0 1 1];
-    v = v + [x y z];
-    f = [1 2 6 5; 2 3 7 6; 3 4 8 7; 4 1 5 8; 1 2 3 4; 5 6 7 8];
-    hPatch = patch('Parent', ax, 'Vertices', v, 'Faces', f, ...
-                   'FaceColor', cor, 'EdgeAlpha', 0.3);
     end
 end
