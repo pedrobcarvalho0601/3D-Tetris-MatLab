@@ -118,6 +118,13 @@ function Tabuleiro(nomePlayer, n, h)
             % Sem colisão: apaga e desce
             delete(atualPeca);
             posZ = proximoZ;
+            
+            for z = 1:h
+                if camadaCompleta(tabuleiro, z)
+                    tabuleiro(:, :, z) = 0;
+                    
+                end
+            end
         end
 
         % A peça ficou desenhada (não foi apagada) — continua para a próxima
@@ -130,4 +137,8 @@ function Tabuleiro(nomePlayer, n, h)
     function teclaPressionada(event)
         teclaAtual = event.Key;
     end
+
+    function completo = camadaCompleta(tabuleiro, z)
+        completo = all(all(tabuleiro(:, :, z) == 1));
+    end    
 end

@@ -13,6 +13,7 @@ function Menu()
     janela = uifigure('Name', 'Tetris 3D');
     janela.Position = [100, 100, 800, 600];
     janela.Resize = 'off';
+    %janela.WindowState = 'fullscreen';
     janela.Color = [0.2, 0.2, 0.2];
 
     % --- IMAGEM DE FUNDO ---
@@ -73,6 +74,7 @@ function Menu()
     botaoOpcoes = uibutton(janela, 'push', 'Text', 'Opções');
     botaoOpcoes.Position = [300, 200, 200, 50];
     botaoOpcoes.FontSize = 18;
+    botaoOpcoes.ButtonPushedFcn = @(src, event) mostrarMenuOpcoes()
 
     % Botão SAIR
     botaoSair = uibutton(janela, 'push', 'Text', 'Sair');
@@ -116,5 +118,8 @@ function Menu()
         
         % Chama o script do Tabuleiro passando o nome
         Tabuleiro(nomePlayer, n, h); 
+    end
+
+    function mostrarMenuOpcoes()
     end
 end
